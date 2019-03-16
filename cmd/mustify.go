@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/mpppk/goofy/lib"
+
 	goofyast "github.com/mpppk/goofy/ast"
 	"github.com/spf13/cobra"
 )
@@ -53,10 +55,8 @@ var mustifyCmd = &cobra.Command{
 
 				var newDecls []ast.Decl
 				for _, decl := range file.Decls {
-					if genDecl, ok := decl.(*ast.GenDecl); ok {
-						if genDecl.Tok == token.IMPORT {
-							newDecls = append(newDecls, genDecl)
-						}
+					if importDecl, ok := lib.DeclToImportDecl(decl); ok {
+						newDecls = append(newDecls, importDecl)
 						continue
 					}
 

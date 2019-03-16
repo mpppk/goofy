@@ -18,6 +18,14 @@
   version = "v1.4.7"
 
 [[projects]]
+  digest = "1:bd091673b35859ad8f831a5b3c961805e108be72d0778b9d07fd383e59ab4287"
+  name = "github.com/go-toolsmith/astcopy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "245af3020944a15e09072c8ad3883c1451d1fdef"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -246,6 +254,19 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:80ddb903ad2e996a2b46c419eaf6eb0a27c1ecc9d266ba98cd02b677b8b2d06f"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "go/buildutil",
+    "go/internal/cgo",
+    "go/loader",
+  ]
+  pruneopts = "UT"
+  revision = "8dcb7bc8c7fe0a895995c76c721cef79419ac98a"
+
+[[projects]]
   digest = "1:1fbc9db22323d45351198fe2207684af350de1626e436332c950aa3e097f161c"
   name = "google.golang.org/appengine"
   packages = [
@@ -274,11 +295,14 @@
   analyzer-version = 1
   input-imports = [
     "github.com/blang/semver",
+    "github.com/go-toolsmith/astcopy",
     "github.com/mitchellh/go-homedir",
     "github.com/pkg/errors",
     "github.com/rhysd/go-github-selfupdate/selfupdate",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
+    "golang.org/x/tools/go/ast/astutil",
+    "golang.org/x/tools/go/loader",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
