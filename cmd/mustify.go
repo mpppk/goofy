@@ -21,14 +21,18 @@ var mustifyCmd = &cobra.Command{
 			outFilePath = &o
 		}
 
-		file, newDecls, err := lib.GenerateErrorWrappersFromProgram(*filePath)
+		fileMap, err := lib.GenerateErrorWrappersFromPackage(*filePath, "main", "must-")
 		if err != nil {
 			panic(err)
 		}
-		file.Decls = newDecls
 
-		if err := lib.WriteAstFile(*outFilePath, file); err != nil {
-			panic(err)
+		for fp, file := range fileMap {
+			dirPath := filepath.Dir(fp)
+			fileName := filepath.Base(fp)
+			newFilePath := filepath.Join(dirPath, "must-"+fileName)
+			if err := lib.WriteAstFile(newFilePath, file); err != nil {
+				panic(err)
+			}
 		}
 	},
 }

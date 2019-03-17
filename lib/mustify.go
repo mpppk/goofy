@@ -6,6 +6,9 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/go-toolsmith/astcopy"
 
 	"github.com/pkg/errors"
 
@@ -14,7 +17,7 @@ import (
 	goofyast "github.com/mpppk/goofy/ast"
 )
 
-func GenerateErrorWrappersFromProgram(filePath string) (*ast.File, []ast.Decl, error) {
+func GenerateErrorWrappersFromFile(filePath string) (*ast.File, []ast.Decl, error) {
 	absFilePath, err := filepath.Abs(filePath)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to get abs file path")
@@ -37,6 +40,36 @@ func GenerateErrorWrappersFromProgram(filePath string) (*ast.File, []ast.Decl, e
 	errorWrappers := funcDeclsToErrorFuncWrappers(exportedFuncDecls, pkg)
 	newDecls = append(newDecls, errorWrappers...)
 	return file, newDecls, nil
+}
+
+func GenerateErrorWrappersFromPackage(filePath, pkgName, ignorePrefix string) (map[string]*ast.File, error) {
+	prog, err := goofyast.NewProgram(filePath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to load program file")
+	}
+
+	pkg := prog.Package(pkgName)
+	m := map[string]*ast.File{}
+	for _, file := range pkg.Files {
+		filePath := prog.Fset.File(file.Pos()).Name()
+		if pathHasPrefix(filePath, ignorePrefix) {
+			continue
+		}
+
+		newFile := astcopy.File(file)
+		var newDecls []ast.Decl
+		importDecls := extractImportDeclsFromDecls(newFile.Decls)
+		newDecls = append(newDecls, importDecls...)
+		exportedFuncDecls := extractExportedFuncDeclsFromDecls(newFile.Decls)
+		errorWrappers := funcDeclsToErrorFuncWrappers(exportedFuncDecls, pkg)
+		if len(errorWrappers) <= 0 {
+			continue
+		}
+		newDecls = append(newDecls, errorWrappers...)
+		newFile.Decls = newDecls
+		m[filePath] = newFile
+	}
+	return m, nil
 }
 
 func extractImportDeclsFromDecls(decls []ast.Decl) (importDecls []ast.Decl) {
@@ -91,6 +124,11 @@ func findPkgAndFileFromProgram(prog *loader.Program, targetAbsFilePath string) (
 		}
 	}
 	return nil, nil, false
+}
+
+func pathHasPrefix(path, prefix string) bool {
+	fileName := filepath.Base(path)
+	return strings.HasPrefix(fileName, prefix)
 }
 
 func WriteAstFile(filePath string, file *ast.File) error {
